@@ -1,23 +1,19 @@
 import { useState, useEffect } from "react";
 
-// ⏱ Total time (2 hours)
+// ⏱ Timer (2 hours)
 const TOTAL_TIME = 120 * 60;
+
+// 👉 TERA DATA IMPORT (same file me hona chahiye)
+const sets = {
+  2: {
+    qs: [] // ⚠️ yahan apna FULL data paste kar (jo tu ne bheja tha)
+  }
+};
 
 function App() {
 
-  // 👉 TERA DATA (short demo — tu apna pura paste kar)
-  const questions = [
-    {
-      q: "India ki capital kya hai?",
-      opts: ["Delhi", "Mumbai", "Chennai", "Kolkata"],
-      ans: 0
-    },
-    {
-      q: "2 + 2 = ?",
-      opts: ["3", "4", "5", "6"],
-      ans: 1
-    }
-  ];
+  // 👉 Set select (Set 2 use kar rahe)
+  const questions = sets[2].qs;
 
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
@@ -42,6 +38,7 @@ function App() {
     );
   }
 
+  // 👉 Answer handle
   const handleAnswer = (index) => {
     if (index === questions[current].ans) {
       setScore(score + 1);
@@ -59,14 +56,23 @@ function App() {
     );
   }
 
-  // ⏱ Format time
+  // ⏱ Time format
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      
-      <h3>⏱ {minutes}:{seconds < 10 ? "0" : ""}{seconds}</h3>
+
+      <h2>JKSSB Exam App</h2>
+
+      <h3>
+        ⏱ {minutes}:{seconds < 10 ? "0" : ""}
+        {seconds}
+      </h3>
+
+      <h4>
+        Question {current + 1} / {questions.length}
+      </h4>
 
       <h2>{questions[current].q}</h2>
 
@@ -74,7 +80,11 @@ function App() {
         <div key={index} style={{ margin: "10px" }}>
           <button
             onClick={() => handleAnswer(index)}
-            style={{ padding: "10px 20px", fontSize: "16px" }}
+            style={{
+              padding: "10px 20px",
+              fontSize: "16px",
+              cursor: "pointer"
+            }}
           >
             {opt}
           </button>
