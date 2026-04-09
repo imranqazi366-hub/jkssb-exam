@@ -2,158 +2,139 @@
 import React, { useState, useEffect } from "react";
 
 // --- CONFIGURATION ---
-const TOTAL_TIME = 120 * 60; 
-const SECTIONS = ["GK", "Accounts", "English", "Statistics", "Mathematics", "Economics", "Science", "Computers"];
+const TOTAL_QUESTIONS = 120;
+const TIME_LIMIT = 120 * 60; // 120 Minutes
 
-// --- FULL QUESTION DATA ---
-// Ensure all 120 questions are included in this array
-const quizQuestions = [
-    {n:1,s:"GK",q:"The Martand Sun Temple, a masterpiece of ancient Kashmiri architecture, was commissioned by which ruler?",opts:["Avantivarman","Lalitaditya Muktapida","Kanishka","Sultan Sikandar"],ans:1,e:"The temple was built by Lalitaditya Muktapida of the Karkota dynasty during the 8th century AD."},
-    {n:2,s:"GK",q:"Under the J&K Reorganisation Act 2019, which date was appointed for the formation of the new Union Territories?",opts:["5 August 2019","15 August 2019","31 October 2019","1 November 2019"],ans:2,e:"The Act came into effect on 31 October 2019, coinciding with National Unity Day."},
-    // ... Add all remaining 118 questions here following the same format ...
-    {n:120,s:"Computers",q:"Which protocol is primarily used for securely transmitting web pages over the internet?",opts:["FTP","HTTP","HTTPS","SMTP"],ans:2,e:"HTTPS (Hypertext Transfer Protocol Secure) encrypts data for secure communication."}
+// --- THE QUESTION ENGINE ---
+// I have structured this to handle the full 120 questions. 
+// You can keep adding your 120 questions into this array.
+const questions = [
+  // GK Section (1-30)
+  { id: 1, sec: "GK", q: "The Martand Sun Temple was built by which ruler of the Karkota Dynasty?", options: ["Avantivarman", "Lalitaditya Muktapida", "Durlabhavardhana", "Jayapida"], ans: 1, ex: "Built in the 8th century by Lalitaditya Muktapida." },
+  { id: 2, sec: "GK", q: "Which article of the Indian Constitution was associated with the special status of J&K?", options: ["Art 35A", "Art 370", "Art 371", "Art 324"], ans: 1, ex: "Article 370 was abrogated in August 2019." },
+  { id: 3, sec: "GK", q: "Who was the last ruling Maharaja of the princely state of Jammu and Kashmir?", options: ["Gulab Singh", "Ranbir Singh", "Hari Singh", "Pratap Singh"], ans: 2, ex: "Maharaja Hari Singh signed the Instrument of Accession in 1947." },
+  // ... (Add your remaining 117 questions here following the exact same format)
+  { id: 120, sec: "Computers", q: "Which of the following is a permanent storage device?", options: ["RAM", "Cache", "Hard Disk", "Registers"], ans: 2, ex: "Hard Disks provide non-volatile, permanent storage." }
 ];
 
-export default function AppleExamPortal() {
+export default function PremiumExam() {
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [userAnswers, setUserAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
-  const [viewMode, setViewMode] = useState("TEST"); // TEST, REVIEW, or RESULT
+  const [answers, setAnswers] = useState({});
+  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const currentQ = quizQuestions[currentIdx];
-  const progress = (Object.keys(userAnswers).length / quizQuestions.length) * 100;
-
+  // Auto-submit on time out
   useEffect(() => {
-    if (timeLeft > 0 && viewMode === "TEST") {
-      const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    if (timeLeft > 0 && !isSubmitted) {
+      const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
       return () => clearInterval(timer);
+    } else if (timeLeft === 0) {
+      setIsSubmitted(true);
     }
-  }, [timeLeft, viewMode]);
+  }, [timeLeft, isSubmitted]);
+
+  const handleSelect = (optionIdx) => {
+    if (isSubmitted) return;
+    setAnswers({ ...answers, [currentIdx]: optionIdx });
+  };
+
+  const calculateScore = () => {
+    return questions.reduce((score, q, i) => (answers[i] === q.ans ? score + 1 : score), 0);
+  };
 
   const formatTime = (s) => {
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const sec = s % 60;
-    return `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  const handleFinish = () => {
-    if (window.confirm("Review your answers before submitting. Are you sure you want to end the test?")) {
-      setViewMode("RESULT");
-    }
-  };
-
-  // --- APPLE DESIGN SYSTEM ---
+  // --- STYLES (Apple Minimalist) ---
   const styles = {
-    wrapper: { backgroundColor: "#F5F5F7", color: "#1D1D1F", minHeight: "100vh", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", padding: "0 20px" },
-    nav: { maxWidth: "1000px", margin: "0 auto", padding: "30px 0", display: "flex", justifyContent: "space-between", alignItems: "center" },
-    card: { backgroundColor: "#FFFFFF", borderRadius: "20px", boxShadow: "0 8px 30px rgba(0,0,0,0.04)", padding: "40px", maxWidth: "800px", margin: "0 auto" },
-    option: (isSelected) => ({
-      width: "100%", padding: "20px", margin: "10px 0", borderRadius: "12px", border: isSelected ? "2px solid #0071E3" : "1px solid #D2D2D7",
-      backgroundColor: isSelected ? "#F5Faff" : "#FFFFFF", cursor: "pointer", fontSize: "17px", textAlign: "left", transition: "all 0.3s ease"
+    container: { minHeight: "100vh", backgroundColor: "#fbfbfd", fontFamily: "-apple-system, sans-serif", color: "#1d1d1f" },
+    nav: { height: "64px", borderBottom: "1px solid #d2d2d7", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 40px", backgroundColor: "rgba(255,255,255,0.8)", backdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 100 },
+    main: { maxWidth: "1100px", margin: "40px auto", display: "grid", gridTemplateColumns: "1fr 320px", gap: "32px", padding: "0 20px" },
+    questionCard: { backgroundColor: "#fff", borderRadius: "24px", padding: "48px", boxShadow: "0 4px 24px rgba(0,0,0,0.04)" },
+    optionBtn: (isSelected) => ({
+      width: "100%", padding: "20px 24px", margin: "8px 0", borderRadius: "14px", border: isSelected ? "2px solid #0071e3" : "1px solid #d2d2d7",
+      backgroundColor: isSelected ? "#f5faff" : "#fff", textAlign: "left", fontSize: "17px", cursor: "pointer", transition: "all 0.2s ease"
     }),
-    btnPrimary: { backgroundColor: "#0071E3", color: "#FFF", border: "none", padding: "12px 25px", borderRadius: "22px", fontWeight: "500", cursor: "pointer", fontSize: "14px" },
-    btnSecondary: { backgroundColor: "transparent", color: "#0071E3", border: "none", padding: "12px 25px", cursor: "pointer", fontWeight: "500" },
-    dot: (status) => ({
-      width: "35px", height: "35px", borderRadius: "50%", border: "none", fontSize: "12px", cursor: "pointer",
-      backgroundColor: status === "active" ? "#1D1D1F" : status === "done" ? "#D2D2D7" : "#E8E8ED",
-      color: status === "active" ? "#FFF" : "#1D1D1F"
-    })
+    sidebar: { backgroundColor: "#fff", borderRadius: "24px", padding: "24px", height: "fit-content", boxShadow: "0 4px 24px rgba(0,0,0,0.04)" },
+    pill: { backgroundColor: "#f5f5f7", padding: "6px 14px", borderRadius: "20px", fontSize: "12px", fontWeight: "600", color: "#86868b" }
   };
 
-  if (viewMode === "RESULT") {
-    const score = quizQuestions.reduce((acc, q, i) => acc + (userAnswers[i] === q.ans ? 1 : 0), 0);
+  if (isSubmitted) {
+    const score = calculateScore();
     return (
-      <div style={styles.wrapper}>
-        <div style={{ ...styles.card, marginTop: "100px", textAlign: "center" }}>
-          <h1 style={{ fontSize: "40px", fontWeight: "600" }}>Your Result.</h1>
-          <p style={{ color: "#86868B", fontSize: "21px" }}>You scored {score} out of {quizQuestions.length}</p>
-          <div style={{ height: "2px", backgroundColor: "#F5F5F7", margin: "40px 0" }}></div>
-          <button onClick={() => window.location.reload()} style={styles.btnPrimary}>Retake Exam</button>
-        </div>
+      <div style={{ ...styles.container, textAlign: "center", padding: "100px 20px" }}>
+        <h1 style={{ fontSize: "48px", fontWeight: "700" }}>Performance Report.</h1>
+        <div style={{ fontSize: "80px", fontWeight: "700", color: "#0071e3", margin: "20px 0" }}>{score}<span style={{ fontSize: "24px", color: "#86868b" }}>/120</span></div>
+        <button onClick={() => window.location.reload()} style={{ backgroundColor: "#1d1d1f", color: "#fff", padding: "16px 32px", borderRadius: "30px", border: "none", cursor: "pointer", fontWeight: "600" }}>Retake Examination</button>
       </div>
     );
   }
 
   return (
-    <div style={styles.wrapper}>
+    <div style={styles.container}>
       <nav style={styles.nav}>
-        <div>
-          <span style={{ fontWeight: "600", fontSize: "21px" }}>JKSSB Exam</span>
-          <div style={{ fontSize: "12px", color: "#86868B" }}>FINANCE ACCOUNT ASSISTANT</div>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: "18px", fontWeight: "500", color: timeLeft < 300 ? "#FF3B30" : "#1D1D1F" }}>{formatTime(timeLeft)}</div>
-          <div style={{ fontSize: "10px", color: "#86868B", letterSpacing: "1px" }}>TIME REMAINING</div>
+        <div style={{ fontWeight: "700", fontSize: "20px" }}>FAA Portal</div>
+        <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+          <div style={{ color: timeLeft < 300 ? "#ff3b30" : "#1d1d1f", fontWeight: "600" }}>{formatTime(timeLeft)}</div>
+          <button onClick={() => {if(window.confirm("Submit test?")) setIsSubmitted(true)}} style={{ backgroundColor: "#0071e3", color: "#fff", border: "none", padding: "8px 20px", borderRadius: "18px", fontWeight: "600", cursor: "pointer" }}>Submit</button>
         </div>
       </nav>
 
-      <div style={{ maxWidth: "1000px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 280px", gap: "40px" }}>
-        
-        {/* Main Exam Area */}
-        <main>
-          <div style={styles.card}>
-            <div style={{ display: "flex", justifyContent: "space-between", color: "#86868B", fontSize: "12px", marginBottom: "20px", fontWeight: "600" }}>
-              <span>SECTION: {currentQ.s}</span>
-              <span>QUESTION {currentIdx + 1} OF {quizQuestions.length}</span>
+      <main style={styles.main}>
+        <div>
+          <div style={styles.questionCard}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "24px" }}>
+              <span style={styles.pill}>{questions[currentIdx].sec}</span>
+              <span style={{ color: "#86868b", fontSize: "14px" }}>Question {currentIdx + 1} of 120</span>
             </div>
+            <h2 style={{ fontSize: "28px", fontWeight: "600", lineHeight: "1.25", marginBottom: "40px" }}>{questions[currentIdx].q}</h2>
             
-            <h2 style={{ fontSize: "24px", fontWeight: "600", marginBottom: "30px", lineHeight: "1.3" }}>{currentQ.q}</h2>
-
             <div style={{ marginBottom: "40px" }}>
-              {currentQ.opts.map((opt, i) => (
-                <button 
-                  key={i} 
-                  onClick={() => setUserAnswers({...userAnswers, [currentIdx]: i})} 
-                  style={styles.option(userAnswers[currentIdx] === i)}
-                >
+              {questions[currentIdx].options.map((opt, i) => (
+                <button key={i} onClick={() => handleSelect(i)} style={styles.optionBtn(answers[currentIdx] === i)}>
                   {opt}
                 </button>
               ))}
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <button disabled={currentIdx === 0} onClick={() => setCurrentIdx(currentIdx - 1)} style={styles.btnSecondary}>Back</button>
-              <div>
-                {currentIdx < quizQuestions.length - 1 ? (
-                  <button onClick={() => setCurrentIdx(currentIdx + 1)} style={styles.btnPrimary}>Continue</button>
-                ) : (
-                  <button onClick={handleFinish} style={{ ...styles.btnPrimary, backgroundColor: "#34C759" }}>Finish Test</button>
-                )}
-              </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button disabled={currentIdx === 0} onClick={() => setCurrentIdx(prev => prev - 1)} style={{ background: "none", border: "none", color: currentIdx === 0 ? "#d2d2d7" : "#0071e3", fontSize: "17px", cursor: "pointer" }}>Previous</button>
+              <button onClick={() => setCurrentIdx(prev => Math.min(prev + 1, 119))} style={{ backgroundColor: "#f5f5f7", border: "none", padding: "12px 32px", borderRadius: "12px", fontSize: "17px", fontWeight: "600", cursor: "pointer" }}>Next</button>
             </div>
           </div>
-        </main>
+        </div>
 
-        {/* Status Sidebar */}
-        <aside>
-          <div style={{ ...styles.card, padding: "20px" }}>
-            <h4 style={{ margin: "0 0 20px 0", fontSize: "14px" }}>Overview</h4>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px" }}>
-              {quizQuestions.map((_, i) => (
-                <button 
-                  key={i} 
-                  onClick={() => setCurrentIdx(i)}
-                  style={styles.dot(currentIdx === i ? "active" : userAnswers[i] !== undefined ? "done" : "idle")}
-                >
-                  {i + 1}
-                </button>
-              ))}
+        <aside style={styles.sidebar}>
+          <h3 style={{ fontSize: "17px", marginBottom: "20px" }}>Overview</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px", maxHeight: "400px", overflowY: "auto", padding: "4px" }}>
+            {questions.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIdx(i)}
+                style={{
+                  height: "36px", width: "100%", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "12px", fontWeight: "600",
+                  backgroundColor: currentIdx === i ? "#1d1d1f" : (answers[i] !== undefined ? "#e8e8ed" : "#f5f5f7"),
+                  color: currentIdx === i ? "#fff" : "#1d1d1f"
+                }}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          <div style={{ marginTop: "24px", borderTop: "1px solid #f5f5f7", paddingTop: "24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", marginBottom: "8px" }}>
+              <span>Completion</span>
+              <span>{Math.round((Object.keys(answers).length / 120) * 100)}%</span>
             </div>
-            
-            <div style={{ marginTop: "30px", borderTop: "1px solid #F5F5F7", paddingTop: "20px" }}>
-                <div style={{ fontSize: "12px", color: "#86868B", marginBottom: "10px" }}>Completed: {Math.round(progress)}%</div>
-                <div style={{ width: "100%", height: "4px", backgroundColor: "#F5F5F7", borderRadius: "2px" }}>
-                    <div style={{ width: `${progress}%`, height: "100%", backgroundColor: "#34C759", borderRadius: "2px", transition: "width 0.5s ease" }}></div>
-                </div>
+            <div style={{ height: "6px", width: "100%", backgroundColor: "#f5f5f7", borderRadius: "3px", overflow: "hidden" }}>
+              <div style={{ height: "100%", backgroundColor: "#0071e3", width: `${(Object.keys(answers).length / 120) * 100}%`, transition: "width 0.3s ease" }}></div>
             </div>
-
-            <button onClick={handleFinish} style={{ width: "100%", marginTop: "30px", backgroundColor: "transparent", color: "#FF3B30", border: "1px solid #FF3B30", borderRadius: "20px", padding: "10px", cursor: "pointer", fontSize: "12px", fontWeight: "600" }}>
-                End Examination
-            </button>
           </div>
         </aside>
-      </div>
+      </main>
     </div>
   );
 }
