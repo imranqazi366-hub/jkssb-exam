@@ -1,88 +1,76 @@
 
-const questions = [
+const examData = [
   // ENGLISH SECTION
-  { 
-    id: 1, sec: "English", 
-    q: "It was very kind of you to do the washing-up, but you ________ it.", 
-    opts: ["didn't have to do", "hadn't to do", "mightn't have done", "mustn't have done"], 
-    ans: 0, ex: " 'Didn't have to do' indicates that an action was performed but was not necessary." [cite: 594, 595, 598]
+  {
+    id: 1, section: "English",
+    question: "It was very kind of you to do the washing-up, but you ________ it.",
+    options: ["didn't have to do", "hadn't to do", "mightn't have done", "mustn't have done"],
+    answer: 0, explanation: "'Didn't have to do' indicates an action that was performed but was not necessary." // [cite: 595, 597, 603]
   },
-  { 
-    id: 2, sec: "English", 
-    q: "Find the error: After knowing truth, (a)/ they took the right decision (b)/ in the matter. (c)/ No error (d)", 
-    opts: ["a", "b", "c", "d"], 
-    ans: 0, ex: "Error is in part (a); it should be 'After knowing the truth'." [cite: 606, 607, 609]
+  {
+    id: 2, section: "English",
+    question: "Find out which part of a sentence has an error: After knowing truth, (a)/ they took the right decision (b)/ in the matter. (c)/ No error (d)",
+    options: ["a", "b", "c", "d"],
+    answer: 0, explanation: "The error is in part (a); the correct phrase is 'knowing the truth'." // [cite: 607, 609, 615]
   },
-  { 
-    id: 3, sec: "English", 
-    q: "Prohibited by law or treaty from being imported or exported:", 
-    opts: ["contraband", "smuggled", "counterfeit", "forged"], 
-    ans: 0, ex: "Contraband refers to goods forbidden by law." [cite: 616, 617, 620]
+  {
+    id: 3, section: "English",
+    question: "Prohibited by law or treaty from being imported or exported:",
+    options: ["contraband", "smuggled", "counterfeit", "forged"],
+    answer: 0 // [cite: 617, 619, 625]
   },
-  { 
-    id: 4, sec: "English", 
-    q: "Choose the word which best expresses the meaning: Inclement", 
-    opts: ["Selfish", "Active", "Unfavourable", "Inactive"], 
-    ans: 2, ex: "Inclement (usually regarding weather) means unpleasantly cold or wet; unfavourable." [cite: 627, 628, 634]
-  },
-  { 
-    id: 5, sec: "English", 
-    q: "Choose the word opposite in meaning: Perspicuity", 
-    opts: ["Vagueness", "Dullness", "Unfairness", "Unwillingness"], 
-    ans: 0, ex: "Perspicuity means clarity; its opposite is vagueness." [cite: 636, 637, 638]
+  {
+    id: 10, section: "English",
+    question: "Choose the alternative which best expresses the meaning of the Idiom/Phrase: 'to smell a rat'",
+    options: ["to smell foul", "to see a rat", "to chase a rat", "to be suspicious"],
+    answer: 3 // [cite: 681, 683, 687]
   },
 
-  // GK & J&K SPECIAL
-  { 
-    id: 16, sec: "GK", 
-    q: "Which is the largest city in the Union Territory of Jammu and Kashmir?", 
-    opts: ["Jammu", "Srinagar", "Anantnag", "Leh"], 
-    ans: 1, ex: "Srinagar is the largest city in the UT of J&K." [cite: 740, 743]
+  // GK & J&K SPECIAL SECTION
+  {
+    id: 16, section: "General Knowledge",
+    question: "Which is the largest city in the Union Territory of Jammu and Kashmir?",
+    options: ["Jammu", "Srinagar", "Anantnag", "Leh"],
+    answer: 1 // [cite: 510, 511]
   },
-  { 
-    id: 17, sec: "GK", 
-    q: "Which river is primarily allocated to Pakistan under the Indus Water Treaty?", 
-    opts: ["Indus", "Ravi", "Beas", "Sutlej"], 
-    ans: 0, ex: "The Indus, Jhelum, and Chenab are allocated to Pakistan for unrestricted use." [cite: 747, 749]
+  {
+    id: 18, section: "General Knowledge",
+    question: "Gulmarg hill station lies in which range?",
+    options: ["Aravali Range", "Pir Panjal Range", "Langpangkong Range", "Changkikong Range"],
+    answer: 1 // [cite: 512, 756, 759]
   },
-  { 
-    id: 18, sec: "GK", 
-    q: "Gulmarg hill station lies in which range?", 
-    opts: ["Aravali Range", "Pir Panjal Range", "Langpangkong Range", "Changkikong Range"], 
-    ans: 1, ex: "Gulmarg is situated in the Pir Panjal Range of the Western Himalayas." [cite: 755, 757]
-  },
-  { 
-    id: 19, sec: "GK", 
-    q: "Which of the following is known as the 'Valley of Shepherds'?", 
-    opts: ["Pahalgam", "Gulmarg", "Sonamarg", "Betaab Valley"], 
-    ans: 0, ex: "Pahalgam is famously known as the Valley of Shepherds." [cite: 760, 762]
+  {
+    id: 19, section: "General Knowledge",
+    question: "Which of the following is known as the 'Valley of Shepherds'?",
+    options: ["Pahalgam", "Gulmarg", "Sonamarg", "Betaab Valley"],
+    answer: 0 // [cite: 513, 762, 767]
   },
 
-  // CURRENT AFFAIRS & AWARDS
-  { 
-    id: 22, sec: "GK", 
-    q: "The book titled 'Memories Never Die' was published as a tribute to whom?", 
-    opts: ["Abdul Kalam", "Atal Bihari Vajpayee", "Pranab Mukherjee", "Manohar Parrikar"], 
-    ans: 0, ex: "This book is a tribute to the life of Dr. A.P.J. Abdul Kalam." [cite: 784, 785]
+  // CURRENT AFFAIRS & AWARDS (2024)
+  {
+    id: 23, section: "Current Affairs",
+    question: "Match Gold winning Paralympic athletes (Paris 2024) to their sports: 1-Avani Lekhara, 2-Praveen Kumar, 3-Nitesh Kumar, 4-Harvinder Singh.",
+    options: ["1-iii, 2-i, 3-iv, 4-ii", "1-i, 2-iii, 3-iv, 4-ii", "1-iii, 2-i, 3-ii, 4-iv", "1-i, 2-iii, 3-ii, 4-iv"],
+    answer: 0, explanation: "Avani: Shooting (iii), Praveen: High Jump (i), Nitesh: Badminton (iv), Harvinder: Archery (ii)." // [cite: 789, 791, 801, 805]
   },
-  { 
-    id: 35, sec: "GK", 
-    q: "What was the mascot for the Khelo India Winter Games, 2024?", 
-    opts: ["Snow Leopard", "Musk Deer", "Red Fox", "Golden Eagle"], 
-    ans: 0, ex: "The mascot was 'Sheen-e She' (Shan), a snow leopard." [cite: 964, 965]
+  {
+    id: 35, section: "General Knowledge",
+    question: "What was the mascot for the Khelo India Winter Games, 2024?",
+    options: ["Snow Leopard", "Musk Deer", "Red Fox", "Golden Eagle"],
+    answer: 0 // [cite: 964, 965, 971]
   },
 
-  // MATH & APTITUDE
-  { 
-    id: 36, sec: "Math", 
-    q: "If the price of a commodity increases by 50%, by what fraction must consumption be reduced to keep expenditure the same?", 
-    opts: ["1/4", "1/3", "1/2", "2/3"], 
-    ans: 1, ex: "Reduction = (r / (100+r)) = 50/150 = 1/3." [cite: 972, 975]
+  // QUANTITATIVE APTITUDE
+  {
+    id: 36, section: "Aptitude",
+    question: "If the price of a commodity is increased by 50% by what fraction must its consumption be reduced so as to keep the same expenditure?",
+    options: ["1/4", "1/3", "1/2", "2/3"],
+    answer: 1, explanation: "Reduction = (50 / (100+50)) = 50/150 = 1/3." // [cite: 972, 974, 977]
   },
-  { 
-    id: 40, sec: "Math", 
-    q: "Value of (0.08 × 0.007) is equal to:", 
-    opts: ["0.056", "0.0056", "0.00056", "0.56"], 
-    ans: 2, ex: "8 × 7 = 56; moving the decimal 5 places (2+3) gives 0.00056." [cite: 1000, 1004]
+  {
+    id: 40, section: "Aptitude",
+    question: "The value of (0.08 × 0.007) is equal to:",
+    options: ["0.056", "0.0056", "0.00056", "0.56"],
+    answer: 2 // [cite: 1000, 1001, 1006]
   }
 ];
