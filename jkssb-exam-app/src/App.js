@@ -1,173 +1,146 @@
 
 import React, { useState, useEffect } from "react";
 
-// --- CONFIGURATION ---
-const TOTAL_TIME = 120 * 60;
-const SC = { 
-  GK: "#1e3a5f", Accounts: "#0f766e", English: "#c2410c", 
-  Statistics: "#15803d", Mathematics: "#6d28d9", Economics: "#0369a1", 
-  Science: "#b45309", Computers: "#be185d" 
-};
-
-// Add your full question array here (using the one from previous message)
-const quizQuestions = [
-    {n:1,s:"GK",q:"The Martand Sun Temple, one of the finest examples of ancient Kashmiri architecture, was built by?",opts:["Avantivarman","Lalitaditya Muktapida","Emperor Kanishka","Sultan Sikandar"],ans:1,e:"Martand Sun Temple built by Lalitaditya Muktapida of Karkota dynasty in 8th century AD, in Anantnag."},
-    {n:2,s:"GK",q:"Which constitutional article was used by Parliament to grant special status to J&K (now abrogated)?",opts:["Article 356","Article 370","Article 371","Article 360"],ans:1,e:"Article 370 granted special status to J&K. Abrogated on 5 August 2019."},
-    // ... paste all other questions here ...
-    {n:106,s:"Science",q:"The process by which plants manufacture their own food using sunlight, water and CO₂ is?",opts:["Respiration","Transpiration","Photosynthesis","Osmosis"],ans:2,e:"Photosynthesis is the process plants use to convert light energy into chemical energy."}
+// --- THE DATA ---
+const questions = [
+  // I have pre-filled the first few; the logic is set for 120.
+  { id: 1, sec: "GK", q: "The Martand Sun Temple was built by which ruler of the Karkota Dynasty?", opts: ["Avantivarman", "Lalitaditya Muktapida", "Durlabhavardhana", "Jayapida"], ans: 1, ex: "Built by Lalitaditya Muktapida in the 8th century AD." },
+  { id: 2, sec: "GK", q: "Which article of the Indian Constitution was associated with the special status of J&K?", opts: ["Art 35A", "Art 370", "Art 371", "Art 324"], ans: 1, ex: "Article 370 was abrogated on August 5, 2019." },
+  // ... continue adding up to 120
+  { id: 120, sec: "Computers", q: "Which is a permanent storage device?", opts: ["RAM", "Cache", "Hard Disk", "Registers"], ans: 2, ex: "Hard Disks provide non-volatile storage." }
 ];
 
-export default function QuizApp() {
+export default function ProExamPortal() {
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [answers, setAnswers] = useState({}); // Stores { index: selectedOption }
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
-  const [isFinished, setIsFinished] = useState(false);
-
-  const currentQ = quizQuestions[currentIdx];
-  const hasAnswered = answers[currentIdx] !== undefined;
+  const [answers, setAnswers] = useState({});
+  const [timeLeft, setTimeLeft] = useState(7200); 
+  const [view, setView] = useState("TEST"); // "TEST" or "RESULTS"
 
   useEffect(() => {
-    if (timeLeft > 0 && !isFinished) {
-      const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    if (timeLeft > 0 && view === "TEST") {
+      const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
       return () => clearInterval(timer);
     }
-  }, [timeLeft, isFinished]);
+  }, [timeLeft, view]);
 
-  const handleSelect = (idx) => {
-    if (hasAnswered) return; // Prevent changing answer after seeing result
-    setAnswers({ ...answers, [currentIdx]: idx });
+  const score = questions.reduce((acc, q, i) => (answers[i] === q.ans ? acc + 1 : acc), 0);
+
+  const formatTime = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
   };
 
-  const progress = (Object.keys(answers).length / quizQuestions.length) * 100;
+  // --- RESULTS VIEW ---
+  if (view === "RESULTS") {
+    return (
+      <div style={{ backgroundColor: "#f8fafc", minHeight: "100vh", padding: "40px 20px", fontFamily: "Inter, sans-serif" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+          <div style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "40px", textAlign: "center", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", marginBottom: "30px" }}>
+            <h1 style={{ color: "#1e293b", margin: 0 }}>Examination Result</h1>
+            <div style={{ fontSize: "64px", fontWeight: "800", color: "#2563eb", margin: "20px 0" }}>{score} <span style={{ fontSize: "24px", color: "#64748b" }}>/ 120</span></div>
+            <p style={{ color: "#64748b", marginBottom: "30px" }}>Accuracy: {((score / 120) * 100).toFixed(1)}%</p>
+            <button onClick={() => window.location.reload()} style={{ padding: "12px 24px", borderRadius: "8px", border: "none", backgroundColor: "#1e293b", color: "#fff", fontWeight: "600", cursor: "pointer" }}>Restart Test</button>
+          </div>
 
-  // --- STYLES ---
-  const theme = {
-    bg: "#0d1117",
-    card: "#161b22",
-    neon: "#00ff41",
-    text: "#c9d1d9",
-    border: "#30363d",
-    wrong: "#ff4444",
-    correct: "#00ff41"
-  };
+          <div style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "30px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}>
+            <h2 style={{ marginBottom: "20px" }}>Answer Key & Explanations</h2>
+            {questions.map((q, i) => (
+              <div key={i} style={{ borderBottom: "1px solid #e2e8f0", padding: "20px 0" }}>
+                <p style={{ fontWeight: "700", color: "#1e293b" }}>Q{i+1}: {q.q}</p>
+                <div style={{ marginTop: "10px", fontSize: "14px" }}>
+                  <div style={{ color: answers[i] === q.ans ? "#16a34a" : "#dc2626", fontWeight: "600" }}>Your Ans: {q.opts[answers[i]] || "Not Answered"}</div>
+                  <div style={{ color: "#16a34a", fontWeight: "600" }}>Correct Ans: {q.opts[q.ans]}</div>
+                  <div style={{ backgroundColor: "#f1f5f9", padding: "12px", borderRadius: "8px", marginTop: "10px", color: "#475569" }}><strong>Explainer:</strong> {q.ex}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- EXAM VIEW ---
+  const q = questions[currentIdx] || { q: "End of Question Bank - Please add your 120 questions to the code.", opts: [], sec: "N/A" };
 
   return (
-    <div style={{ backgroundColor: theme.bg, color: theme.text, minHeight: "100vh", fontFamily: "sans-serif", padding: "20px" }}>
-      
-      {/* Top Navigation Bar */}
-      <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${theme.border}`, paddingBottom: "10px" }}>
-        <h2 style={{ color: theme.neon, margin: 0 }}>JKSSB Exam Portal</h2>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: theme.neon }}>{Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2,'0')}</div>
-          <div style={{ fontSize: "0.8rem", color: "#8b949e" }}>REMAINING TIME</div>
+    <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif", color: "#1e293b" }}>
+      {/* Navbar */}
+      <nav style={{ backgroundColor: "#fff", borderBottom: "1px solid #e2e8f0", padding: "15px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ fontWeight: "800", fontSize: "20px", color: "#2563eb" }}>EXAM<span style={{ color: "#1e293b" }}>PRO</span></div>
+        <div style={{ display: "flex", gap: "30px", alignItems: "center" }}>
+          <div style={{ padding: "8px 16px", backgroundColor: "#fef2f2", color: "#991b1b", borderRadius: "8px", fontWeight: "700" }}>⏱ {formatTime(timeLeft)}</div>
+          <button onClick={() => { if(window.confirm("Submit Test?")) setView("RESULTS") }} style={{ backgroundColor: "#2563eb", color: "#fff", border: "none", padding: "10px 24px", borderRadius: "8px", fontWeight: "700", cursor: "pointer" }}>Submit Test</button>
         </div>
-      </div>
+      </nav>
 
-      {/* Progress Bar */}
-      <div style={{ width: "100%", height: "4px", backgroundColor: "#30363d", margin: "20px 0" }}>
-        <div style={{ width: `${progress}%`, height: "100%", backgroundColor: theme.neon, transition: "width 0.4s ease", boxShadow: `0 0 10px ${theme.neon}` }}></div>
-      </div>
-
-      <div style={{ display: "flex", maxWidth: "1200px", margin: "0 auto", gap: "20px", flexDirection: window.innerWidth < 800 ? "column" : "row" }}>
+      <div style={{ maxWidth: "1200px", margin: "40px auto", display: "grid", gridTemplateColumns: "1fr 340px", gap: "30px", padding: "0 20px" }}>
         
-        {/* Main Quiz Area */}
-        <div style={{ flex: 3 }}>
-          <div style={{ backgroundColor: theme.card, padding: "30px", borderRadius: "12px", border: `1px solid ${theme.border}` }}>
-            <span style={{ color: theme.neon, fontSize: "0.9rem", fontWeight: "bold", letterSpacing: "1px" }}>{currentQ.s.toUpperCase()} SECTION</span>
-            <h3 style={{ fontSize: "1.4rem", marginTop: "10px", lineHeight: "1.4" }}>{currentQ.q}</h3>
-            
-            <div style={{ marginTop: "30px" }}>
-              {currentQ.opts.map((opt, i) => {
-                let btnBg = "transparent";
-                let btnBorder = theme.border;
-                let textColor = theme.text;
-
-                if (hasAnswered) {
-                  if (i === currentQ.ans) {
-                    btnBg = "rgba(0, 255, 65, 0.1)";
-                    btnBorder = theme.correct;
-                    textColor = theme.correct;
-                  } else if (i === answers[currentIdx]) {
-                    btnBg = "rgba(255, 68, 68, 0.1)";
-                    btnBorder = theme.wrong;
-                    textColor = theme.wrong;
-                  }
-                } else {
-                  btnBg = "#0d1117";
-                }
-
-                return (
-                  <button
-                    key={i}
-                    onClick={() => handleSelect(i)}
-                    style={{
-                      display: "block", width: "100%", padding: "15px", margin: "12px 0",
-                      textAlign: "left", borderRadius: "8px", cursor: hasAnswered ? "default" : "pointer",
-                      backgroundColor: btnBg, color: textColor, border: `1px solid ${btnBorder}`,
-                      fontSize: "1rem", fontWeight: "500", transition: "all 0.2s"
-                    }}
-                  >
-                    <span style={{ marginRight: "15px", opacity: 0.5 }}>{String.fromCharCode(65 + i)}</span> {opt}
-                  </button>
-                );
-              })}
+        {/* Main Section */}
+        <section>
+          <div style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "40px", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
+              <span style={{ backgroundColor: "#e0e7ff", color: "#3730a3", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "800" }}>{q.sec}</span>
+              <span style={{ color: "#64748b", fontWeight: "600" }}>Question {currentIdx + 1} of 120</span>
             </div>
 
-            {/* Answer Feedback Section */}
-            {hasAnswered && (
-              <div style={{ marginTop: "20px", padding: "20px", borderRadius: "8px", backgroundColor: "#0d1117", borderLeft: `4px solid ${theme.neon}` }}>
-                <strong style={{ color: theme.neon }}>Explanation:</strong>
-                <p style={{ margin: "10px 0 0", fontSize: "0.95rem", color: "#8b949e" }}>{currentQ.e}</p>
-              </div>
-            )}
+            <h2 style={{ fontSize: "24px", lineHeight: "1.4", marginBottom: "40px", fontWeight: "700" }}>{q.q}</h2>
 
-            {/* Navigation Buttons */}
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "30px" }}>
-              <button 
-                onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))}
-                style={{ background: "none", color: theme.text, border: "none", cursor: "pointer" }}
-              >
-                ← Previous
-              </button>
-              <button 
-                onClick={() => setCurrentIdx(Math.min(quizQuestions.length - 1, currentIdx + 1))}
-                style={{ backgroundColor: theme.neon, color: "#000", border: "none", padding: "10px 25px", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}
-              >
-                Next Question →
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar Question Grid */}
-        <div style={{ flex: 1 }}>
-          <div style={{ backgroundColor: theme.card, padding: "20px", borderRadius: "12px", border: `1px solid ${theme.border}` }}>
-            <h4 style={{ margin: "0 0 15px 0" }}>Question Map</h4>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px" }}>
-              {quizQuestions.map((_, i) => (
-                <div
-                  key={i}
-                  onClick={() => setCurrentIdx(i)}
+            <div style={{ display: "grid", gap: "12px" }}>
+              {q.opts.map((opt, i) => (
+                <button 
+                  key={i} 
+                  onClick={() => setAnswers({...answers, [currentIdx]: i})}
                   style={{
-                    height: "35px", display: "flex", alignItems: "center", justifyContent: "center",
-                    borderRadius: "4px", fontSize: "0.8rem", cursor: "pointer",
-                    border: `1px solid ${currentIdx === i ? theme.neon : theme.border}`,
-                    backgroundColor: answers[i] !== undefined ? (quizQuestions[i].ans === answers[i] ? "rgba(0, 255, 65, 0.2)" : "rgba(255, 68, 68, 0.2)") : "transparent",
-                    color: currentIdx === i ? theme.neon : theme.text
+                    textAlign: "left", padding: "20px", borderRadius: "12px", fontSize: "16px", fontWeight: "500", transition: "0.2s", cursor: "pointer",
+                    border: answers[currentIdx] === i ? "2px solid #2563eb" : "1px solid #e2e8f0",
+                    backgroundColor: answers[currentIdx] === i ? "#eff6ff" : "#fff",
+                    color: answers[currentIdx] === i ? "#1e40af" : "#1e293b"
                   }}
                 >
-                  {i + 1}
-                </div>
+                  {opt}
+                </button>
               ))}
             </div>
-            <button 
-                onClick={() => setIsFinished(true)}
-                style={{ width: "100%", marginTop: "20px", padding: "12px", backgroundColor: "transparent", border: `1px solid ${theme.wrong}`, color: theme.wrong, borderRadius: "6px", cursor: "pointer" }}
-            >
-                End Session
-            </button>
+
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "50px", paddingTop: "30px", borderTop: "1px solid #f1f5f9" }}>
+              <button disabled={currentIdx === 0} onClick={() => setCurrentIdx(currentIdx - 1)} style={{ background: "none", border: "1px solid #e2e8f0", padding: "12px 24px", borderRadius: "8px", color: "#64748b", cursor: "pointer", fontWeight: "600" }}>Previous</button>
+              <button onClick={() => setCurrentIdx(Math.min(119, currentIdx + 1))} style={{ backgroundColor: "#1e293b", color: "#fff", border: "none", padding: "12px 40px", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Next Question</button>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* Sidebar */}
+        <aside style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "25px", height: "fit-content", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}>
+          <h3 style={{ fontSize: "16px", marginBottom: "20px", fontWeight: "700" }}>Question Progress</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px", maxHeight: "400px", overflowY: "auto", padding: "5px" }}>
+            {Array.from({ length: 120 }).map((_, i) => (
+              <button 
+                key={i} 
+                onClick={() => setCurrentIdx(i)}
+                style={{
+                  height: "40px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: "700", fontSize: "12px",
+                  backgroundColor: currentIdx === i ? "#2563eb" : (answers[i] !== undefined ? "#1e293b" : "#f1f5f9"),
+                  color: currentIdx === i || answers[i] !== undefined ? "#fff" : "#64748b"
+                }}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          
+          <div style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid #f1f5f9" }}>
+             <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "10px", display: "flex", justifyContent: "space-between" }}>
+                <span>Total Answered</span>
+                <span>{Object.keys(answers).length} / 120</span>
+             </div>
+             <div style={{ width: "100%", height: "8px", backgroundColor: "#f1f5f9", borderRadius: "4px", overflow: "hidden" }}>
+                <div style={{ width: `${(Object.keys(answers).length / 120) * 100}%`, height: "100%", backgroundColor: "#22c55e", transition: "0.3s" }}></div>
+             </div>
+          </div>
+        </aside>
+
       </div>
     </div>
   );
